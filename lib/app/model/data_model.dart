@@ -1,12 +1,29 @@
+// To parse this JSON data, do
+//
+//     final dataModel = dataModelFromJson(jsonString);
+
+import 'dart:convert';
+
+List<DataModel> dataModelFromJson(String str) => List<DataModel>.from(json.decode(str).map((x) => DataModel.fromJson(x)));
+
+String dataModelToJson(List<DataModel> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+
 class DataModel {
-  int? number;
-  String? alpha;
+  DataModel({
+    required this.alpha,
+    required this.digit,
+  });
 
-  DataModel(this.number, this.alpha);
+  String alpha;
+  String digit;
 
-  DataModel.fromJson(Map<String,dynamic>json){
-    number=json["digit"];
-    alpha=json["alpha"];
+  factory DataModel.fromJson(Map<String, dynamic> json) => DataModel(
+    alpha: json["alpha"],
+    digit: json["digit"],
+  );
 
-  }
+  Map<String, dynamic> toJson() => {
+    "alpha": alpha,
+    "digit": digit,
+  };
 }

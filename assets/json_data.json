@@ -42,5 +42,29 @@
   {
     "alpha": "k",
     "digit": "11"
+  },
+  {
+    "alpha": "l",
+    "digit": "12"
+  },
+  {
+    "alpha": "m",
+    "digit": "13"
+  },
+  {
+    "alpha": "n",
+    "digit": "14"
+  },
+  {
+    "alpha": "o",
+    "digit": "15"
+  },
+  {
+    "alpha": "p",
+    "digit": "16"
+  },
+  {
+    "alpha": "q",
+    "digit": "17"
   }
 ]
