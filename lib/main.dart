@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import 'app/services/home_page_services.dart';
 import 'app/view/home_view.dart';
 
 void main() {
@@ -16,13 +18,11 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
-
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(),
+      home: MultiProvider(providers: [
+        ChangeNotifierProvider(create: (_) => HomePageServices()),
+      ], child: const MyHomePage()),
     );
   }
 }
-
-
-

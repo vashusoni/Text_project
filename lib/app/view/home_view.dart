@@ -15,20 +15,27 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  bool _isChecked = false;
+  int totalSelectingBox = 0;
+  int totalSelectingAlphabets = 0;
+  int totalSelectingDigits = 0;
+  List numberList = [];
+  List alphabetList = [];
+  Map<int, bool> alphabetMap = {};
+  Map<int, bool> numberMap = {};
+
   bool isColors = false;
   String massage = "please select checkBox";
   bool selected = false;
-List<bool>boxStatus=[];
+  List<bool> boxStatus = [];
+
   //
   // Random rnd = Random();
   // int min = 7, max = 12;
   int number = 0;
 
-
   @override
   void initState() {
-  boxStatus.add(false);
+    boxStatus.add(false);
     super.initState();
   }
 
@@ -74,13 +81,21 @@ List<bool>boxStatus=[];
                               onChanged: (value) {
                                 int val = int.parse(value);
                                 if (val <= 11) {
-                                  if (value.length == 2) {
-                                    setState(() {
-                                      number = int.parse(value);
-                                      massage =
-                                          "How many boxes do you want to select";
-                                    });
+                                  alphabetMap.clear();
+                                  numberMap.clear();
+                                  totalSelectingBox = val;
+                                  number = int.parse(value);
+                                  for (int i = 0; i <= number; i++) {
+                                    log("loop_number:$i");
+                                    alphabetMap[i] = false;
+                                    numberMap[i] = false;
                                   }
+                                  massage =
+                                      "How many boxes do you want to select";
+                                  setState(() {
+                                    log("loop_number:$alphabetMap");
+                                    log("totalSelectingBox:$totalSelectingBox");
+                                  });
                                 } else if (val > 11) {
                                   setState(() {
                                     massage =
@@ -148,6 +163,7 @@ List<bool>boxStatus=[];
                                 if (val <= 22) {
                                   log("max selecting number is$value");
                                   setState(() {
+                                    totalSelectingAlphabets = val;
                                     massage = "please select alphabet number";
                                   });
                                 } else if (value.length == 2) {
@@ -213,11 +229,10 @@ List<bool>boxStatus=[];
                                 setState(() {
                                   int val = int.parse(value);
                                   if (val <= 11) {
-                                    if (value.length == 2) {
-                                      setState(() {
-                                        massage = "please select number";
-                                      });
-                                    }
+                                    setState(() {
+                                      totalSelectingDigits= val;
+                                      massage = "please select number";
+                                    });
                                   } else {
                                     setState(() {
                                       massage =
@@ -319,7 +334,7 @@ List<bool>boxStatus=[];
         body: Row(
           children: [
             SizedBox(
-              height: MediaQuery.of(context).size.height - 80,
+              height: MediaQuery.of(context).size.height - 100,
               width: MediaQuery.of(context).size.width / 2.1,
               child: FutureBuilder<List<DataModel>>(
                   future: HomePageServices().getJsonData(),
@@ -333,11 +348,19 @@ List<bool>boxStatus=[];
                           return CheckboxListTile(
                             title: Text(alphaSnapShot.data![index].alpha),
                             controlAffinity: ListTileControlAffinity.leading,
-                            value: boxStatus[index],
+                            value: alphabetMap[index],
                             onChanged: (val) {
                               setState(() {
-                                boxStatus[index]=! boxStatus[index];
-                                _isChecked = val!;
+                                totalSelectingAlphabets =
+                                    totalSelectingAlphabets != 0
+                                        ? totalSelectingAlphabets - 1
+                                        : totalSelectingAlphabets;
+                                if (totalSelectingAlphabets == 0) {
+                                } else {
+                                  alphabetMap[index] == true
+                                      ? alphabetMap[index] = false
+                                      : alphabetMap[index] = true;
+                                }
                               });
                             },
                           );
@@ -358,9 +381,49 @@ List<bool>boxStatus=[];
               color: Colors.black,
             ),
             SizedBox(
-              height: MediaQuery.of(context).size.height,
+              height: MediaQuery.of(context).size.height - 100,
               width: MediaQuery.of(context).size.width / 2.1,
-            )
+              child: FutureBuilder<List<DataModel>>(
+                  future: HomePageServices().getJsonData(),
+                  builder: (context, alphaSnapShot) {
+                    if (alphaSnapShot.hasData) {
+                      return ListView.builder(
+                        scrollDirection: Axis.vertical,
+                        shrinkWrap: true,
+                        itemCount: number,
+                        itemBuilder: (context, index) {
+                          return CheckboxListTile(
+                            title: Text(alphaSnapShot.data![index].digit),
+                            controlAffinity: ListTileControlAffinity.leading,
+                            value: numberMap[index],
+                            onChanged: (val) {
+                              setState(() {
+
+                                if (totalSelectingDigits == 0) {
+                                  log("dhyadyhaydhgaydg$totalSelectingDigits");
+                                } else {
+                                  numberMap[index] == true
+                                      ? numberMap[index] = false
+                                      : numberMap[index] = true;
+                                }
+                                totalSelectingDigits =
+                                totalSelectingDigits != 0
+                                    ? totalSelectingDigits - 1
+                                    : totalSelectingDigits;
+                              });
+                            },
+                          );
+                        },
+                      );
+                    } else if (alphaSnapShot.connectionState ==
+                        ConnectionState.waiting) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                    return const Text("Data not found");
+                  }),
+            ),
           ],
         ),
         bottomSheet: Container(
