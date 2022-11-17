@@ -3,6 +3,7 @@ import 'dart:math' hide log;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:test_projects/app/services/home_page_services.dart';
 
 import '../model/data_model.dart';
@@ -15,30 +16,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int totalSelectingBox = 0;
-  int totalSelectingAlphabets = 0;
-  int totalSelectingDigits = 0;
-  List numberList = [];
-  List alphabetList = [];
-  Map<int, bool> alphabetMap = {};
-  Map<int, bool> numberMap = {};
-
-  bool isColors = false;
-  String massage = "please select checkBox";
-  bool selected = false;
-  List<bool> boxStatus = [];
-
-  //
-  // Random rnd = Random();
-  // int min = 7, max = 12;
-  int number = 0;
-
-  @override
-  void initState() {
-    boxStatus.add(false);
-    super.initState();
-  }
-
+  TextEditingController eachSideController=TextEditingController();
+  TextEditingController totalController=TextEditingController();
+  TextEditingController digitController=TextEditingController();
+  TextEditingController alphaController=TextEditingController();
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -73,54 +54,52 @@ class _MyHomePageState extends State<MyHomePage> {
                           child: SizedBox(
                             height: 30,
                             width: 30,
-                            child: TextFormField(
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                LengthLimitingTextInputFormatter(2),
-                              ],
-                              onChanged: (value) {
-                                int val = int.parse(value);
-                                if (val <= 11) {
-                                  alphabetMap.clear();
-                                  numberMap.clear();
-                                  totalSelectingBox = val;
-                                  number = int.parse(value);
-                                  for (int i = 0; i <= number; i++) {
-                                    log("loop_number:$i");
-                                    alphabetMap[i] = false;
-                                    numberMap[i] = false;
+                            child: Consumer<HomePageServices>(
+                                builder: (context, provider, child) {
+                              return TextFormField(
+                                controller: eachSideController,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  LengthLimitingTextInputFormatter(2),
+                                ],
+                                onChanged: (value) {
+                                  totalController.clear();
+                                  digitController.clear();
+                                  alphaController.clear();
+                                  if (int.parse(value) <= 11) {
+                                    provider.setLimitedTotalCheckBox(
+                                        int.parse(value));
+                                    provider
+                                        .setEachSideCheckBox(int.parse(value));
+                                    provider.getJsonData();
+                                    provider.setMessage(
+                                        "how many check boxes you want to select");
+                                    provider.setMessageBgColors(true);
+                                  } else {
+                                    provider.setMessage(
+                                        "you can not select more then(11) Boxes");
+                                    provider.setMessageBgColors(false);
                                   }
-                                  massage =
-                                      "How many boxes do you want to select";
-                                  setState(() {
-                                    log("loop_number:$alphabetMap");
-                                    log("totalSelectingBox:$totalSelectingBox");
-                                  });
-                                } else if (val > 11) {
-                                  setState(() {
-                                    massage =
-                                        "total number of Box to de displayed on each side not more the 11";
-                                  });
-                                }
-                              },
-                              style: const TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white),
-                              decoration: const InputDecoration(
-                                  enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        width: 3, color: Colors.white),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        width: 3, color: Colors.white),
-                                  ),
-                                  disabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        width: 3, color: Colors.white),
-                                  )),
-                            ),
+                                },
+                                style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
+                                decoration: const InputDecoration(
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                          width: 3, color: Colors.white),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                          width: 3, color: Colors.white),
+                                    ),
+                                    disabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                          width: 3, color: Colors.white),
+                                    )),
+                              );
+                            }),
                           ))
                     ],
                   ),
@@ -149,45 +128,47 @@ class _MyHomePageState extends State<MyHomePage> {
                           child: SizedBox(
                             height: 30,
                             width: 30,
-                            child: TextFormField(
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                LengthLimitingTextInputFormatter(2),
-                              ],
-                              style: const TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white),
-                              onChanged: (value) {
-                                int val = int.parse(value);
-                                if (val <= 22) {
-                                  log("max selecting number is$value");
-                                  setState(() {
-                                    totalSelectingAlphabets = val;
-                                    massage = "please select alphabet number";
-                                  });
-                                } else if (value.length == 2) {
-                                  setState(() {
-                                    isColors = true;
-                                    massage =
-                                        "Error:Unable to select as max no of Secting reched(22)";
-                                  });
-                                }
-                              },
-                              decoration: const InputDecoration(
-                                  enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        width: 3, color: Colors.white),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        width: 3, color: Colors.white),
-                                  ),
-                                  disabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        width: 3, color: Colors.white),
-                                  )),
-                            ),
+                            child: Consumer<HomePageServices>(
+                                builder: (context, provider, child) {
+                              return TextFormField(
+                                controller: totalController,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  LengthLimitingTextInputFormatter(2),
+                                ],
+                                onChanged: (value) {
+                                  if (provider.limitedTotalCheckBox >=
+                                      int.parse(value)) {
+                                    provider.seTotalCheckBox(int.parse(value));
+                                    provider.setMessage(
+                                        "please select max no of Alphabet..");
+                                    provider.setMessageBgColors(true);
+                                    return;
+                                  } else {
+                                    provider.setMessage(
+                                        "You can not select more then${provider.limitedTotalCheckBox}");
+                                    provider.setMessageBgColors(false);
+                                  }
+                                },
+                                style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
+                                decoration: const InputDecoration(
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                          width: 3, color: Colors.white),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                          width: 3, color: Colors.white),
+                                    ),
+                                    disabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                          width: 3, color: Colors.white),
+                                    )),
+                              );
+                            }),
                           ))
                     ],
                   ),
@@ -216,45 +197,47 @@ class _MyHomePageState extends State<MyHomePage> {
                           child: SizedBox(
                             height: 30,
                             width: 30,
-                            child: TextFormField(
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                LengthLimitingTextInputFormatter(2),
-                              ],
-                              style: const TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white),
-                              onChanged: (value) {
-                                setState(() {
-                                  int val = int.parse(value);
-                                  if (val <= 11) {
-                                    setState(() {
-                                      totalSelectingDigits= val;
-                                      massage = "please select number";
-                                    });
+                            child: Consumer<HomePageServices>(
+                                builder: (context, provider, child) {
+                              return TextFormField(
+                                controller: alphaController,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  LengthLimitingTextInputFormatter(2),
+                                ],
+                                onChanged: (value) {
+                                  if (provider.selectingEachSideCheckBox >=
+                                      int.parse(value)) {
+                                    provider
+                                        .setAlphabetCheckBox(int.parse(value));
+                                    provider.setMessage(
+                                        "please select max no of Digits..");
+                                    provider.setMessageBgColors(true);
                                   } else {
-                                    setState(() {
-                                      massage =
-                                          "you can select alphabets more then 11";
-                                    });
+                                    provider.setMessage(
+                                        "You can not select more then ${provider.selectingEachSideCheckBox}");
+                                    provider.setMessageBgColors(false);
                                   }
-                                });
-                              },
-                              decoration: const InputDecoration(
-                                  enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        width: 3, color: Colors.white),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        width: 3, color: Colors.white),
-                                  ),
-                                  disabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        width: 3, color: Colors.white),
-                                  )),
-                            ),
+                                },
+                                style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
+                                decoration: const InputDecoration(
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                          width: 3, color: Colors.white),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                          width: 3, color: Colors.white),
+                                    ),
+                                    disabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                          width: 3, color: Colors.white),
+                                    )),
+                              );
+                            }),
                           ))
                     ],
                   ),
@@ -283,49 +266,49 @@ class _MyHomePageState extends State<MyHomePage> {
                           child: SizedBox(
                             height: 30,
                             width: 30,
-                            child: TextFormField(
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                LengthLimitingTextInputFormatter(2),
-                              ],
-                              style: const TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white),
-                              onChanged: (value) {
-                                setState(() {
-                                  int val = int.parse(value);
-                                  if (val <= 11) {
-                                    if (value.length == 2) {
-                                      setState(() {
-                                        massage = "please select checkbox";
-                                      });
-                                    }
+                            child: Consumer<HomePageServices>(
+                                builder: (context, provider, child) {
+                              return TextFormField(
+                                controller: digitController,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  LengthLimitingTextInputFormatter(2),
+                                ],
+                                onChanged: (value) {
+                                  if (provider.selectingEachSideCheckBox >=
+                                      int.parse(value)) {
+                                    provider.setDigitCheckBox(int.parse(value));
+                                    provider.setMessage(
+                                        "please select checkBox..!");
+                                    provider.setMessageBgColors(true);
                                   } else {
-                                    setState(() {
-                                      massage =
-                                          "you can not select Number more then 11";
-                                    });
+                                    provider.setMessage(
+                                        "You can not select more then ${provider.selectingEachSideCheckBox}");
+                                    provider.setMessageBgColors(false);
                                   }
-                                });
-                              },
-                              decoration: const InputDecoration(
-                                  enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        width: 3, color: Colors.white),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        width: 3, color: Colors.white),
-                                  ),
-                                  disabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        width: 3, color: Colors.white),
-                                  )),
-                            ),
+                                },
+                                style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
+                                decoration: const InputDecoration(
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                          width: 3, color: Colors.white),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                          width: 3, color: Colors.white),
+                                    ),
+                                    disabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                          width: 3, color: Colors.white),
+                                    )),
+                              );
+                            }),
                           ))
                     ],
-                  ),
+                  )
                 ],
               ),
             ),
@@ -334,45 +317,53 @@ class _MyHomePageState extends State<MyHomePage> {
         body: Row(
           children: [
             SizedBox(
-              height: MediaQuery.of(context).size.height - 100,
               width: MediaQuery.of(context).size.width / 2.1,
+              height: MediaQuery.of(context).size.height - 120,
               child: FutureBuilder<List<DataModel>>(
                   future: HomePageServices().getJsonData(),
-                  builder: (context, alphaSnapShot) {
-                    if (alphaSnapShot.hasData) {
-                      return ListView.builder(
-                        scrollDirection: Axis.vertical,
-                        shrinkWrap: true,
-                        itemCount: number,
-                        itemBuilder: (context, index) {
-                          return CheckboxListTile(
-                            title: Text(alphaSnapShot.data![index].alpha),
-                            controlAffinity: ListTileControlAffinity.leading,
-                            value: alphabetMap[index],
-                            onChanged: (val) {
-                              setState(() {
-                                totalSelectingAlphabets =
-                                    totalSelectingAlphabets != 0
-                                        ? totalSelectingAlphabets - 1
-                                        : totalSelectingAlphabets;
-                                if (totalSelectingAlphabets == 0) {
-                                } else {
-                                  alphabetMap[index] == true
-                                      ? alphabetMap[index] = false
-                                      : alphabetMap[index] = true;
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return Consumer<HomePageServices>(
+                          builder: (context, provider, child) {
+                        return ListView.builder(
+                          itemCount: provider.selectingEachSideCheckBox,
+                          itemBuilder: (context, index) {
+                            return CheckboxListTile(
+                              title: Text(snapshot.data![index].alpha),
+                              controlAffinity: ListTileControlAffinity.leading,
+                              value: provider
+                                  .alphabetMap[snapshot.data![index].alpha],
+                              onChanged: (val) {
+                                if (provider.alphaValue <
+                                    provider.selectingAlphabetCheckBox) {
+                                  provider.setAlpha(provider.alphabetMap[
+                                              snapshot.data![index].alpha] ==
+                                          true
+                                      ? provider.alphaValue - 1
+                                      : provider.alphaValue + 1);
+                                  log("alphaValue${provider.alphaValue}");
+                                  provider.setAlphaMap(
+                                      key: snapshot.data![index].alpha);
+                                  provider.setMessage("You select alpha check box${provider.alphaValue}");
+                                  provider.setMessageBgColors(true);
                                 }
-                              });
-                            },
-                          );
-                        },
-                      );
-                    } else if (alphaSnapShot.connectionState ==
+                                else {
+                                  provider.setMessage("You can not select more then alpha check box ${provider.selectingAlphabetCheckBox}");
+                                  provider.setMessageBgColors(false);
+
+                                }
+                              },
+                            );
+                          },
+                        );
+                      });
+                    } else if (snapshot.connectionState ==
                         ConnectionState.waiting) {
                       return const Center(
                         child: CircularProgressIndicator(),
                       );
                     }
-                    return const Text("Data not found");
+                    return const Center(child: Text("Something is Wrong..!"));
                   }),
             ),
             Container(
@@ -381,72 +372,102 @@ class _MyHomePageState extends State<MyHomePage> {
               color: Colors.black,
             ),
             SizedBox(
-              height: MediaQuery.of(context).size.height - 100,
               width: MediaQuery.of(context).size.width / 2.1,
+              height: MediaQuery.of(context).size.height - 120,
               child: FutureBuilder<List<DataModel>>(
                   future: HomePageServices().getJsonData(),
-                  builder: (context, alphaSnapShot) {
-                    if (alphaSnapShot.hasData) {
-                      return ListView.builder(
-                        scrollDirection: Axis.vertical,
-                        shrinkWrap: true,
-                        itemCount: number,
-                        itemBuilder: (context, index) {
-                          return CheckboxListTile(
-                            title: Text(alphaSnapShot.data![index].digit),
-                            controlAffinity: ListTileControlAffinity.leading,
-                            value: numberMap[index],
-                            onChanged: (val) {
-                              setState(() {
-
-                                if (totalSelectingDigits == 0) {
-                                  log("dhyadyhaydhgaydg$totalSelectingDigits");
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return Consumer<HomePageServices>(
+                          builder: (context, provider, child) {
+                        return ListView.builder(
+                          itemCount: provider.selectingEachSideCheckBox,
+                          itemBuilder: (context, index) {
+                            return CheckboxListTile(
+                              title: Text(snapshot.data![index].digit),
+                              controlAffinity: ListTileControlAffinity.leading,
+                              value: provider
+                                  .digitMap[snapshot.data![index].digit],
+                              onChanged: (val) {
+                                if (provider.digitValue <
+                                    provider.selectingDigitCheckBox) {
+                                  provider.setDigit(provider.digitMap[
+                                              snapshot.data![index].digit] ==
+                                          true
+                                      ? provider.digitValue - 1
+                                      : provider.digitValue + 1);
+                                  log("alphaValue${provider.digitValue}");
+                                  provider.setDigitMap(
+                                      key: snapshot.data![index].digit);
+                                  provider.setMessage("You select digit check box${provider.digitValue}");
+                                  provider.setMessageBgColors(true);
                                 } else {
-                                  numberMap[index] == true
-                                      ? numberMap[index] = false
-                                      : numberMap[index] = true;
+                                  provider.setMessage("You can not select more then digit check box ${provider.selectingDigitCheckBox}");
+                                  provider.setMessageBgColors(false);
                                 }
-                                totalSelectingDigits =
-                                totalSelectingDigits != 0
-                                    ? totalSelectingDigits - 1
-                                    : totalSelectingDigits;
-                              });
-                            },
-                          );
-                        },
-                      );
-                    } else if (alphaSnapShot.connectionState ==
+                              },
+                            );
+                          },
+                        );
+                      });
+                    } else if (snapshot.connectionState ==
                         ConnectionState.waiting) {
                       return const Center(
                         child: CircularProgressIndicator(),
                       );
                     }
-                    return const Text("Data not found");
+                    return const Center(child: Text("Something is Wrong..!"));
                   }),
             ),
           ],
         ),
-        bottomSheet: Container(
-          height: 70,
-          width: MediaQuery.of(context).size.width,
-          color: Colors.red,
-          child: Row(
-            children: [
-              Expanded(
-                  flex: 3,
-                  child: Container(
-                    color: Colors.purple,
-                  )),
-              Expanded(
-                  flex: 8,
-                  child: Container(
-                    color: Colors.green,
-                    child: Center(
-                      child: Text(massage),
-                    ),
-                  )),
-            ],
-          ),
+        bottomSheet: Row(
+          children: [
+            Expanded(
+                flex: 2,
+                child: Consumer<HomePageServices>(
+                  builder: (context,provider,child) {
+                    return InkWell(
+                      onTap: (){
+                        setState(() {
+                          eachSideController.clear();
+                          totalController.clear();
+                          digitController.clear();
+                          alphaController.clear();
+                          provider.setDigitCheckBox(0);
+                          provider.setAlphabetCheckBox(0);
+                          provider.getJsonData();
+                          provider.setMessageBgColors(true);
+                          provider.setMessage("'please select each side Check Box'");
+                        });
+                      },
+                      child: Container(
+                        color: Colors.purple,
+                        height: 50,
+                        child: const Center(
+                          child: Text(
+                            "Clear All \nField",
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                )),
+            Expanded(
+                flex: 8,
+                child: Consumer<HomePageServices>(
+                    builder: (context, provider, child) {
+                  return Container(
+                      color: provider.messageBgColor == true
+                          ? Colors.green
+                          : Colors.red,
+                      height: 50,
+                      child: Center(
+                        child: Text(provider.message),
+                      ));
+                })),
+          ],
         ),
       ),
     );
